@@ -19,8 +19,8 @@ import Monad
 -- row's vertical
 -- Numbers inside actual index of array 
 
-data Player = X | Y
-	deriving (Show, Eq)
+data Player = X | O
+	deriving (Show, Eq, Ord)
 data Board = Board (DiffArray Int (Maybe Player))
 	deriving (Show)
 type Row = Int
@@ -28,25 +28,29 @@ type Col = Int
 
 terminal	:: Board -> Bool
 terminal b = case (boardWinner b) of
-		Nothing -> False
+		Nothing -> boardFull b
 		_ -> True
 
 evaluate	:: Board -> Int -> Int -> Int -> Int
-evaluate b noVal xVal yVal = case (boardWinner b) of
+evaluate b noVal xVal oVal = case (boardWinner b) of
 				Nothing -> noVal
 				(Just X) -> xVal
-				(Just Y) -> yVal
+				(Just O) -> oVal
 
 evaluateX	:: Board -> Int
 evaluateX b = evaluate b 0 1 (-1)
 
-evaluateY	:: Board -> Int
-evaluateY b = evaluate b 0 (-1) 1
+evaluateO	:: Board -> Int
+evaluateO b = evaluate b 0 (-1) 1
+
+msame	:: Ord a => Maybe a -> Maybe a -> Maybe a
+msame a@(Just x) b@(Just y) | x == y = a
+msame _ _ = Nothing
 
 boardSearch	:: Board -> Int -> Int -> (Int -> Int) -> Maybe Player
 boardSearch (Board b) index stop _ | index == stop = b ! index
 boardSearch brd@(Board b) index stop next = 
-	(b ! index) `mplus` boardSearch brd (next index) stop next
+	(b ! index) `msame` boardSearch brd (next index) stop next
 
 rowWinner	:: Board -> Row -> Maybe Player
 rowWinner b r = boardSearch b start stop (+1)
@@ -82,9 +86,15 @@ emptyBoard = Board $ listArray (0,8) [Nothing | i <- [0..8]]
 setSquare	:: Board -> Int -> Player -> Board
 setSquare (Board b) index p = (Board (b // [(index, (Just p))]))
 
+emptySquares	:: Board -> [Int]
+emptySquares (Board b) = filter (\ind -> b ! ind == Nothing) [0..8]
+
+boardFull	:: Board -> Bool
+boardFull b = null $ emptySquares b
+
 generateSuccessors	:: Board -> Bool -> [Board]
-generateSuccessors b xMove = map (\i -> setSquare b i p) [0..8]
-	where p = if xMove then X else Y
+generateSuccessors b xMove = map (\i -> setSquare b i p) (emptySquares b)
+	where p = if xMove then X else O
 
 playGame	:: Int
 playGame = minimax emptyBoard True generateSuccessors evaluateX terminal
