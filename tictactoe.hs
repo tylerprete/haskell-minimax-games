@@ -76,5 +76,17 @@ allColWinner b = foldr mplus Nothing (map (\c -> colWinner b c) [0,1,2])
 boardWinner	:: Board -> Maybe Player
 boardWinner b = diagWinner b `mplus` allRowWinner b `mplus` allColWinner b
 
+emptyBoard	:: Board
+emptyBoard = Board $ listArray (0,8) [Nothing | i <- [0..8]]
+
+setSquare	:: Board -> Int -> Player -> Board
+setSquare (Board b) index p = (Board (b // [(index, (Just p))]))
+
+generateSuccessors	:: Board -> Bool -> [Board]
+generateSuccessors b xMove = map (\i -> setSquare b i p) [0..8]
+	where p = if xMove then X else Y
+
+playGame	:: Int
+playGame = minimax emptyBoard True generateSuccessors evaluateX terminal
 main =
-	putStrLn "HI"
+	print playGame
