@@ -2,15 +2,15 @@
 
 GHC=ghc
 
-GFLAGS=--make
+GFLAGS=-XMultiParamTypeClasses --make
 
-all: tictactoe
+all: runtictactoe
 
-tictactoe:
-	$(GHC) $(GFLAGS) tictactoe.hs
+runtictactoe:
+	$(GHC) $(GFLAGS) runtictactoe.hs
 
 clean: clean_binaries
 	rm -rf *.hi *.o *~
 
 clean_binaries:
-	rm -rf tictactoe
+	rm -rf runtictactoe

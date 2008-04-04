@@ -1,7 +1,7 @@
 -- Tyler Prete
 -- TicTacToe using Minimax library
 
-module Main
+module TicTacToe
 where
 import Minimax
 import Data.Array.Diff
@@ -23,8 +23,19 @@ data Player = X | O
 	deriving (Show, Eq, Ord)
 data Board = Board (DiffArray Int (Maybe Player))
 	deriving (Show)
+data TTTGameState = TTTGameState Board Player
+instance GameState TTTGameState where
+	terminalState (TTTGameState b _) = terminal b
+	evaluateState (TTTGameState b _) = evaluateX b
+	genSuccessors (TTTGameState b _) = emptySquares b
+	makeSuccessor (TTTGameState b p) index = (TTTGameState (setSquare b index p) (switchPlayer p))
+
 type Row = Int
 type Col = Int
+
+switchPlayer	:: Player -> Player
+switchPlayer X = O
+switchPlayer O = X
 
 terminal	:: Board -> Bool
 terminal b = case (boardWinner b) of
@@ -92,11 +103,11 @@ emptySquares (Board b) = filter (\ind -> b ! ind == Nothing) [0..8]
 boardFull	:: Board -> Bool
 boardFull b = null $ emptySquares b
 
-generateSuccessors	:: Board -> Bool -> [Board]
-generateSuccessors b xMove = map (\i -> setSquare b i p) (emptySquares b)
-	where p = if xMove then X else O
+makeMove	:: (Int, Maybe Int)
+makeMove = minimax (TTTGameState emptyBoard X) False 0 10
 
-playGame	:: Int
-playGame = minimax emptyBoard True generateSuccessors evaluateX terminal
-main =
-	print playGame
+makeMoveGS gs = let (score, move) = minimax gs False 0 10 in
+	case move of
+		(Just x) -> makeSuccessor gs x
+		Nothing -> error "should never get Nothing as a move"
+
