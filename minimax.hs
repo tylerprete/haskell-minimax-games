@@ -1,7 +1,6 @@
 module Minimax
 where
-import Control.Parallel.Strategies
-import Control.Parallel
+import Debug.Trace
 
 class GameState a where
 	evaluateState	:: a -> Int
@@ -37,3 +36,26 @@ minimax gs minimize depth depthlimit =
 		wrappedSuccessors = map Just successors
 		scoreSuccPairs = zip scores wrappedSuccessors in
 	minOrMax scoreSuccPairs
+
+alphabetafold	:: (GameState a) => a -> [Int] -> Int -> Int -> Int -> Int -> Int
+alphabetafold _ [] alpha _ _ _ = alpha
+alphabetafold gs (x:xs) alpha beta depth depthlimit = 
+	let	child = makeSuccessor gs x
+		newAlpha = negate $ alphabeta child (depth+1) depthlimit (-beta) (-alpha) in
+	if (beta <= newAlpha)
+	then alpha
+	else alphabetafold gs xs (max alpha newAlpha) beta depth depthlimit
+
+alphabeta	:: (GameState a) => a -> Int -> Int -> Int -> Int -> Int
+alphabeta gs _ _ _ _ | terminalState gs = trace "Reached terminal state." (evaluateState gs)
+alphabeta gs depth depthlimit _ _ | depth == depthlimit = evaluateState gs
+alphabeta gs depth depthlimit alpha beta =
+	alphabetafold gs successors alpha beta depth depthlimit
+	where 	successors = genSuccessors gs
+{-		alphabetafold [] a _ = a
+		alphabetafold (x:xs) a b = 
+			let	child = makeSuccessor gs x
+				newAlpha = negate $ alphabeta child (depth+1) depthlimit (-b) (-a) in
+			if (b <= newAlpha)
+			then a
+			else alphabetafold xs (max a newAlpha) b-}
