@@ -106,7 +106,7 @@ boardFull b = null $ emptySquares b
 makeMove	:: (Int, Maybe Int)
 makeMove = minimax (TTTGameState emptyBoard X) False 0 10
 
-makeMoveGS gs = let (score, move) = minimax gs False 0 10 in
+makeMoveGS gs = let (score, move) = alphabeta gs 0 10 (-100) 100 in
 	case move of
 		(Just x) -> makeSuccessor gs x
 		Nothing -> error "should never get Nothing as a move"

@@ -37,25 +37,53 @@ minimax gs minimize depth depthlimit =
 		scoreSuccPairs = zip scores wrappedSuccessors in
 	minOrMax scoreSuccPairs
 
-alphabetafold	:: (GameState a) => a -> [Int] -> Int -> Int -> Int -> Int -> Int
+{- alphabetafold	:: (GameState a) => a -> [Int] -> Int -> Int -> Int -> Int -> Int
 alphabetafold _ [] alpha _ _ _ = alpha
 alphabetafold gs (x:xs) alpha beta depth depthlimit = 
 	let	child = makeSuccessor gs x
 		newAlpha = negate $ alphabeta child (depth+1) depthlimit (-beta) (-alpha) in
 	if (beta <= newAlpha)
 	then alpha
-	else alphabetafold gs xs (max alpha newAlpha) beta depth depthlimit
+	else alphabetafold gs xs (max alpha newAlpha) beta depth depthlimit -}
 
-alphabeta	:: (GameState a) => a -> Int -> Int -> Int -> Int -> Int
-alphabeta gs _ _ _ _ | terminalState gs = trace "Reached terminal state." (evaluateState gs)
-alphabeta gs depth depthlimit _ _ | depth == depthlimit = evaluateState gs
+alphabeta	:: (GameState a) => a -> Int -> Int -> Int -> Int -> (Int, Maybe Int)
+alphabeta gs _ _ _ _ | terminalState gs = (evaluateState gs, Nothing)
+alphabeta gs depth depthlimit _ _ | depth == depthlimit = (evaluateState gs, Nothing)
 alphabeta gs depth depthlimit alpha beta =
-	alphabetafold gs successors alpha beta depth depthlimit
+	alphabetafold successors alpha beta (-1)
 	where 	successors = genSuccessors gs
-{-		alphabetafold [] a _ = a
+		alphabetafold [] a _ bestChild = (a, Just bestChild)
+		alphabetafold (x:xs) a b bestChild = 
+			let	child = makeSuccessor gs x
+				newAlpha = alphabetamin child (depth+1) depthlimit a b in
+			if (newAlpha >= b)
+			then (newAlpha, Just x)
+			else alphabetafold xs (max a newAlpha) b (if newAlpha > a then x else bestChild)
+
+alphabetamax	:: (GameState a) => a -> Int -> Int -> Int -> Int -> Int
+alphabetamax gs _ _ _ _ | terminalState gs = evaluateState gs
+alphabetamax gs depth depthlimit _ _ | depth == depthlimit = evaluateState gs
+alphabetamax gs depth depthlimit alpha beta =
+	alphabetafold successors alpha beta
+	where 	successors = genSuccessors gs
+		alphabetafold [] a _ = a
 		alphabetafold (x:xs) a b = 
 			let	child = makeSuccessor gs x
-				newAlpha = negate $ alphabeta child (depth+1) depthlimit (-b) (-a) in
-			if (b <= newAlpha)
-			then a
-			else alphabetafold xs (max a newAlpha) b-}
+				newAlpha = alphabetamin child (depth+1) depthlimit a b in
+			if (newAlpha >= b)
+			then newAlpha
+			else alphabetafold xs (max a newAlpha) b
+
+alphabetamin	:: (GameState a) => a -> Int -> Int -> Int -> Int -> Int
+alphabetamin gs _ _ _ _ | terminalState gs = evaluateState gs
+alphabetamin gs depth depthlimit _ _ | depth == depthlimit = evaluateState gs
+alphabetamin gs depth depthlimit alpha beta =
+	alphabetafold successors alpha beta
+	where 	successors = genSuccessors gs
+		alphabetafold [] _ b = b
+		alphabetafold (x:xs) a b = 
+			let	child = makeSuccessor gs x
+				newBeta = alphabetamax child (depth+1) depthlimit a b in
+			if (newBeta <= a)
+			then newBeta
+			else alphabetafold xs a (min b newBeta)
