@@ -25,6 +25,7 @@ instance GameState KalahGameState where
 	evaluateState (KalahGameState b _ p2) = kalahTotal b p2
 	genSuccessors (KalahGameState b p _) = possibleMoves b p
 	makeSuccessor gs index = sow gs index
+	isMaximizing (KalahGameState _ p _) = p == P1
 
 switchPlayer	:: Player -> Player
 switchPlayer P1 = P2
@@ -72,7 +73,7 @@ placeStones	:: Board -> Player -> Int -> Int -> (Board, Player)
 placeStones b p pos 0 = (b, switchPlayer p)
 placeStones (Board b) p pos 1 | pos == kalahPos p = (newBoard, p)
 	where	newBoard = Board $ b // [(pos, (b ! pos) + 1)]
-placeStones brd@(Board b) p pos 1 | b ! pos == 0 && holeOwner pos == p =
+placeStones brd@(Board b) p pos 1 | b ! pos == 0 && b ! (holeAcrossBoard pos) /= 0 && holeOwner pos == p =
 	(Board $ b // [(otherHole, 0), (kalahPos p, newCount)], switchPlayer p)
 	where 	otherHole = holeAcrossBoard pos
 		otherHoleCount = (b ! otherHole)

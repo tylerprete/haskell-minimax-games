@@ -29,6 +29,7 @@ instance GameState TTTGameState where
 	evaluateState (TTTGameState b _) = evaluateX b
 	genSuccessors (TTTGameState b _) = emptySquares b
 	makeSuccessor (TTTGameState b p) index = (TTTGameState (setSquare b index p) (switchPlayer p))
+	isMaximizing (TTTGameState _ p) = p == X
 
 type Row = Int
 type Col = Int
