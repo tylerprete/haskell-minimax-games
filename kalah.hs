@@ -22,10 +22,10 @@ data KalahGameState = KalahGameState Board Player Player
 	deriving (Show)
 instance GameState KalahGameState where
 	terminalState (KalahGameState b _ _) = terminal b
-	evaluateState (KalahGameState b _ p2) = kalahTotal b p2
+	evaluateState (KalahGameState b _ p2) = (kalahTotal b p2 - kalahTotal b (switchPlayer p2)) * (if terminal b then 100 else 1)
 	genSuccessors (KalahGameState b p _) = possibleMoves b p
-	makeSuccessor gs index = sow gs index
-	isMaximizing (KalahGameState _ p _) = p == P1
+	makeSuccessor = sow
+	isMaximizing (KalahGameState _ p p2) = p == p2
 
 switchPlayer	:: Player -> Player
 switchPlayer P1 = P2
@@ -41,7 +41,7 @@ kalahPos	:: Player -> Int
 kalahPos p = if p == P1 then 6 else 13
 
 terminal	:: Board -> Bool
-terminal b = kalahTotal b P1 == 0 || kalahTotal b P2 == 0
+terminal b = rowTotal b P1 == 0 || rowTotal b P2 == 0
 
 kalahAdvantage	:: Board -> Player -> Int
 kalahAdvantage b p = (if terminal b then 100 else 1) * (kalahTotal b p - kalahTotal b (switchPlayer p))
@@ -53,7 +53,17 @@ sow	:: KalahGameState -> Int -> KalahGameState
 sow (KalahGameState brd@(Board b) p p2) pos = (KalahGameState newBoard newP p2)
 	where	count = (b ! pos)
 		newB = Board (b // [(pos, 0)])
-		(newBoard, newP) = placeStones newB p (pos + 1) count
+		(newBrd, newP) = placeStones newB p (pos + 1) count
+		newBoard = if terminal newBrd then endGameMove newBrd else newBrd
+
+moveHoleToKalah	:: Board -> Int -> Board
+moveHoleToKalah (Board b) i = Board $ b // [(k, curr + val), (i, 0)] where
+	k = if i < 6 then 6 else 13
+	curr = (b ! k)
+	val = (b ! i) 
+
+endGameMove	:: Board -> Board
+endGameMove b = foldr (\i brd -> moveHoleToKalah brd i) b ([0..5] ++ [7..12])
 
 nextPos	:: Player -> Int -> Int
 nextPos P1 pos | pos == 12 = 0
@@ -70,7 +80,7 @@ holeAcrossBoard = (-) 12
 
 -- Gets list of places to put a stone, will actually update Board in sow
 placeStones	:: Board -> Player -> Int -> Int -> (Board, Player)
-placeStones b p pos 0 = (b, switchPlayer p)
+placeStones b p _ 0 = (b, switchPlayer p)
 placeStones (Board b) p pos 1 | pos == kalahPos p = (newBoard, p)
 	where	newBoard = Board $ b // [(pos, (b ! pos) + 1)]
 placeStones brd@(Board b) p pos 1 | b ! pos == 0 && b ! (holeAcrossBoard pos) /= 0 && holeOwner pos == p =
@@ -79,4 +89,4 @@ placeStones brd@(Board b) p pos 1 | b ! pos == 0 && b ! (holeAcrossBoard pos) /=
 		otherHoleCount = (b ! otherHole)
 		newCount = (b ! (kalahPos p)) + otherHoleCount + 1
  
-placeStones brd@(Board b) p pos count = placeStones (Board (b // [(pos, (b!pos)+1)])) p (nextPos p pos) (count - 1)
+placeStones (Board b) p pos count = placeStones (Board (b // [(pos, (b!pos)+1)])) p (nextPos p pos) (count - 1)

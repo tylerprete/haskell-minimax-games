@@ -6,6 +6,8 @@ import Kalah
 import System
 import List
 import Data.Array.Diff
+import IO
+import Text.Printf
 
 indent = replicate 8 ' '
 
@@ -22,15 +24,31 @@ stringToMove P2 "C" = 10
 stringToMove P2 "D" = 9
 stringToMove P2 "E" = 8
 stringToMove P2 "F" = 7
-stringToMove _ s | s == "Q" || s == "q" = -999
+stringToMove _ (s:_) | s == 'Q' || s == 'q' = -999
 stringToMove _ _ = -1
+
+moveToString	:: Int -> String
+moveToString i = case i of
+	0 -> "f"
+	1 -> "e"
+	2 -> "d"
+	3 -> "c"
+	4 -> "b"
+	5 -> "a"
+	7 -> "F"
+	8 -> "E"
+	9 -> "D"
+	10 -> "C"
+	11 -> "B"
+	12 -> "A"
+	otherwise -> error "Bad Move"
 
 getMove :: Player -> IO Int
 getMove p = 	do
 		str <- getLine
 		num <- (return $ stringToMove p str)
 		case num of
-			(-1) -> do { putStrLn "Invalid Move. Try again: "; getMove p }
+			(-1) -> do { putStr "Invalid Move. Try again: "; hFlush stdout; getMove p }
 			(-999) -> do { putStrLn "Quitting Game."; exitWith ExitSuccess }
 			num -> return num
 
@@ -40,19 +58,19 @@ printPlayer P2 = putStrLn "Player P's move: "
 
 stringRow	:: Board -> [Int] -> IO String
 stringRow (Board b) xs = do
-				lineStr <- return (intersperse ' ' (foldr (\num str -> (show (b ! num)) ++ str) "" xs))
+				lineStr <- return (foldl (\str n -> str ++ (printf "%3d" n)) "" (map (\i -> b ! i) xs))
 				return lineStr 
 
 printTopRow	:: Board -> IO ()
 printTopRow b = do	str <- stringRow b [12,11..7]
-			putStrLn $ indent ++ "P " ++ str
+			putStrLn $ indent ++ "P" ++ str
 
 printBottomRow	:: Board -> IO ()
 printBottomRow b = do	str <- stringRow b [0..5]
-			putStrLn $ indent ++ "  " ++ str ++ " p"
+			putStrLn $ indent ++ " " ++ str ++ "  p"
 
 printKalahs	:: Board -> IO ()
-printKalahs (Board b) = putStrLn $ indent ++ (show $ b ! 13) ++ (replicate 13 ' ') ++ (show $ b ! 6)
+printKalahs (Board b) = putStrLn $ indent ++ (show $ b ! 13) ++ (replicate 20 ' ') ++ (show $ b ! 6)
 
 printBoard	:: Board -> IO ()
 printBoard b = do
@@ -68,43 +86,32 @@ printGameState (KalahGameState b p _) = do
 
 initialGameState = KalahGameState initialBoard P1 P1
 
-{-
-humanMoveGS gs@(KalahGameState b p p2) = do
-			moveInt <- getMove
-			newB <- return (setSquare b moveInt p)
-			newGS <- return (KalahGameState newB (switchPlayer p) p2)
-			return newGS
+-- applyMove	:: KalahGameState -> Int -> KalahGameState
+applyMove gs m = return (sow gs m) >>= playGame
 
-printSquare (Board b) ind | (b ! ind) /= Nothing = let (Just x) = (b ! ind) in (show x)
-printSquare _ ind = (show ind)
+humanMoveGS (KalahGameState _ p _) = do m <- getMove p; putStrLn ""; return m
 
-printRow b r = printSquare b (x !! 0) ++ "|" ++ printSquare b (x !! 1) ++ "|"  ++ printSquare b (x !! 2) ++ "\n"
-	where x = case r of
-			0 -> [0,1,2]
-			1 -> [3,4,5]
-			2 -> [6,7,8]
+winner	:: Player -> String
+winner p = "Winner is " ++ (show p)
 
-spacer = "-----\n"
+-- makeMoveGS	:: KalahGameState -> Int
+makeMoveGS gs = do	(score, move) <- return $ alphabeta gs 0 8 (-10000) 10000 
+			case move of
+				(Just x) -> do { printf "Selected machine move is '%s'. (evaluation = %d)\n\n" (moveToString x) score; return x }
+				Nothing -> error "Should never get nothing as a move"
 
-printBoard b = printRow b 0 ++ spacer ++ printRow b 1 ++ spacer ++ printRow b 2
 
-printGameState gs@(TTTGameState b p) = do
-					putStrLn $ (show p) ++ "'s move."
-					putStrLn $ printBoard b
-					return gs
-					
-
-playGame gs@(TTTGameState b p) | terminal b = 
+playGame gs@(KalahGameState b p p2) | terminal b = 
 	let winString = case (evaluateState gs) of
-			  1 -> "Winner is X"
-			  (-1) -> "Winner is O"
+			  x | x > 0 -> winner p2
+			  x | x < 0 -> winner (switchPlayer p2)
 			  0 -> "Draw."
-	in putStrLn $ "Game over. " ++ winString
+	in (putStrLn $ "Game over. " ++ winString) >> printGameState gs
 
-playGame gs@(TTTGameState _ X) = putStrLn "Machine moving" >> (return (makeMoveGS gs)) >>= (\newGS -> printGameState newGS) >>= playGame
-playGame gs@(TTTGameState _ O) = putStrLn "Your move" >> humanMoveGS gs >>= playGame
+playGame gs@(KalahGameState b P1 P1) = printGameState gs >> putStrLn "Machine moving" >> makeMoveGS gs >>= \m -> applyMove gs m
+playGame gs@(KalahGameState b P2 _) = printGameState gs >> putStr "Enter move: " >> hFlush stdout >> humanMoveGS gs >>= \m -> applyMove gs m
+
+startGameState = KalahGameState initialBoard P1 P1
 main = do 
-	startGS <- return (TTTGameState emptyBoard X)
-	printGameState startGS
+	startGS <- return startGameState
 	playGame startGS
--}
