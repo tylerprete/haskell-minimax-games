@@ -3,10 +3,10 @@ where
 import Minimax
 import Kalah
 -- Haskell Imports
-import System
-import List
+import System.Exit
+import Data.List
 import Data.Array.Diff
-import IO
+import System.IO
 import Text.Printf
 
 indent = replicate 8 ' '
@@ -94,7 +94,7 @@ humanMoveGS (KalahGameState _ p _) = do m <- getMove p; putStrLn ""; return m
 winner	:: Player -> String
 winner p = "Winner is " ++ (show p)
 
--- makeMoveGS	:: KalahGameState -> Int
+makeMoveGS	:: KalahGameState -> IO Int
 makeMoveGS gs = do	(score, move) <- return $ alphabeta gs 0 8 (-10000) 10000 
 			case move of
 				(Just x) -> do { printf "Selected machine move is '%s'. (evaluation = %d)\n\n" (moveToString x) score; return x }

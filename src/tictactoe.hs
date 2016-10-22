@@ -5,7 +5,7 @@ module TicTacToe
 where
 import Minimax
 import Data.Array.Diff
-import Monad
+import Control.Monad
 
 -- Board is as follows
 --    0 1 2

@@ -5,7 +5,7 @@ where
 
 import Minimax
 -- Haskell imports
-import List
+import Data.List
 import Data.Array.Diff
 
 data Player = P1 | P2
