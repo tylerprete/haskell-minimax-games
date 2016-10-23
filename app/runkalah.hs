@@ -56,6 +56,9 @@ printPlayer    :: Player -> IO ()
 printPlayer P1 = putStrLn "Player p's move: "
 printPlayer P2 = putStrLn "Player P's move: "
 
+letterRow   :: [Char] -> String
+letterRow chars = intercalate "  " $ map (\x -> [x]) chars
+
 stringRow    :: Board -> [Int] -> IO String
 stringRow (Board b) xs = do
                 lineStr <- return (foldl (\str n -> str ++ (printf "%3d" n)) "" (map (\i -> b ! i) xs))
@@ -63,11 +66,13 @@ stringRow (Board b) xs = do
 
 printTopRow    :: Board -> IO ()
 printTopRow b = do  str <- stringRow b [12,11..7]
+                    putStrLn $ indent ++ "   " ++ letterRow ['A'..'F']
                     putStrLn $ indent ++ "P" ++ str
 
 printBottomRow  :: Board -> IO ()
 printBottomRow b = do   str <- stringRow b [0..5]
                         putStrLn $ indent ++ " " ++ str ++ "  p"
+                        putStrLn $ indent ++ "   " ++ letterRow (reverse ['a'..'f'])
 
 
 printKalahs    :: Board -> IO ()
