@@ -72,7 +72,7 @@ moveHoleToKalah    :: Board -> Int -> Board
 moveHoleToKalah (Board b) i = Board $ b // [(k, curr + val), (i, 0)] where
     k = if i < 6 then 6 else 13
     curr = (b ! k)
-    val = (b ! i) 
+    val = (b ! i)
 
 endGameMove    :: Board -> Board
 --endGameMove b = foldr (\i brd -> moveHoleToKalah brd i) b ([0..5] ++ [7..12])
@@ -106,7 +106,7 @@ placeStones brd@(Board b) p pos 1 | b ! pos == 0 && b ! (holeAcrossBoard pos) /=
     where   otherHole = holeAcrossBoard pos
 	        otherHoleCount = (b ! otherHole)
 	        newCount = (kalahTotal brd p) + otherHoleCount + 1
- 
+
 placeStones (Board b) p pos count = placeStones (Board (b // [(pos, (b!pos)+1)])) p (nextPos p pos) (count - 1)
 -}
 

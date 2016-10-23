@@ -59,7 +59,7 @@ printPlayer P2 = putStrLn "Player P's move: "
 stringRow    :: Board -> [Int] -> IO String
 stringRow (Board b) xs = do
                 lineStr <- return (foldl (\str n -> str ++ (printf "%3d" n)) "" (map (\i -> b ! i) xs))
-                return lineStr 
+                return lineStr
 
 printTopRow    :: Board -> IO ()
 printTopRow b = do  str <- stringRow b [12,11..7]
@@ -96,13 +96,13 @@ winner    :: Player -> String
 winner p = "Winner is " ++ (show p)
 
 makeMoveGS  :: KalahGameState -> IO Int
-makeMoveGS gs = do  (score, move) <- return $ alphabeta gs 0 8 (-10000) 10000 
+makeMoveGS gs = do  (score, move) <- return $ alphabeta gs 0 8 (-10000) 10000
                     case move of
                         (Just x) -> do { printf "Selected machine move is '%s'. (evaluation = %d)\n\n" (moveToString x) score; return x }
                         Nothing -> error "Should never get nothing as a move"
 
 
-playGame gs@(KalahGameState b p p2) | terminal b = 
+playGame gs@(KalahGameState b p p2) | terminal b =
     let winString = case (evaluateState gs) of
               x | x > 0 -> winner p2
               x | x < 0 -> winner (switchPlayer p2)
@@ -113,6 +113,6 @@ playGame gs@(KalahGameState b P1 P1) = printGameState gs >> putStrLn "Machine mo
 playGame gs@(KalahGameState b P2 _) = printGameState gs >> putStr "Enter move: " >> hFlush stdout >> humanMoveGS gs >>= \m -> applyMove gs m
 
 startGameState = KalahGameState initialBoard P1 P1
-main = do 
+main = do
     startGS <- return startGameState
     playGame startGS

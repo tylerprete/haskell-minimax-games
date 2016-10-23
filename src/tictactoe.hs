@@ -11,13 +11,13 @@ import Control.Monad
 --    0 1 2
 --   _______
 -- 0 |0|1|2|
---   _______   
+--   _______
 -- 1 |3|4|5|
 --   _______
 -- 2 |6|7|8|
 -- col's horizontal
 -- row's vertical
--- Numbers inside actual index of array 
+-- Numbers inside actual index of array
 
 data Player = X | O
     deriving (Show, Eq, Ord)
@@ -61,7 +61,7 @@ msame _ _ = Nothing
 
 boardSearch    :: Board -> Int -> Int -> (Int -> Int) -> Maybe Player
 boardSearch (Board b) index stop _ | index == stop = b ! index
-boardSearch brd@(Board b) index stop next = 
+boardSearch brd@(Board b) index stop next =
     (b ! index) `msame` boardSearch brd (next index) stop next
 
 rowWinner   :: Board -> Row -> Maybe Player
@@ -78,7 +78,7 @@ diagWinnerTL    :: Board -> Maybe Player
 diagWinnerTL b = boardSearch b 0 8 (+4)
 
 diagWinnerTR    :: Board -> Maybe Player
-diagWinnerTR b = boardSearch b 2 6 (+2) 
+diagWinnerTR b = boardSearch b 2 6 (+2)
 
 diagWinner    :: Board -> Maybe Player
 diagWinner b = diagWinnerTL b `mplus` diagWinnerTR b
@@ -111,4 +111,3 @@ makeMoveGS gs = let (score, move) = alphabeta gs 0 10 (-100) 100 in
     case move of
         (Just x) -> makeSuccessor gs x
         Nothing -> error "should never get Nothing as a move"
-

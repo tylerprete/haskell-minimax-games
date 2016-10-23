@@ -30,9 +30,9 @@ printGameState gs@(TTTGameState b p) = do
                     putStrLn $ (show p) ++ "'s move."
                     putStrLn $ printBoard b
                     return gs
-                    
 
-playGame gs@(TTTGameState b p) | terminal b = 
+
+playGame gs@(TTTGameState b p) | terminal b =
     let winString = case (evaluateState gs) of
               1 -> "Winner is X"
               (-1) -> "Winner is O"
@@ -41,7 +41,7 @@ playGame gs@(TTTGameState b p) | terminal b =
 
 playGame gs@(TTTGameState _ X) = putStrLn "Machine moving" >> (return (makeMoveGS gs)) >>= (\newGS -> printGameState newGS) >>= playGame
 playGame gs@(TTTGameState _ O) = putStrLn "Your move" >> humanMoveGS gs >>= playGame
-main = do 
+main = do
     startGS <- return (TTTGameState emptyBoard X)
     printGameState startGS
     playGame startGS

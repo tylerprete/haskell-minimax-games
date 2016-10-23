@@ -23,7 +23,7 @@ minimax gs minimize depth depthlimit =
 
 {- alphabetafold    :: (GameState a) => a -> [Int] -> Int -> Int -> Int -> Int -> Int
 alphabetafold _ [] alpha _ _ _ = alpha
-alphabetafold gs (x:xs) alpha beta depth depthlimit = 
+alphabetafold gs (x:xs) alpha beta depth depthlimit =
     let    child = makeSuccessor gs x
         newAlpha = negate $ alphabeta child (depth+1) depthlimit (-beta) (-alpha) in
     if (beta <= newAlpha)
@@ -37,7 +37,7 @@ alphabeta gs depth depthlimit alpha beta =
     alphabetafold successors alpha beta (-1)
     where   successors = genSuccessors gs
             alphabetafold [] a _ bestChild = (a, Just bestChild)
-            alphabetafold (x:xs) a b bestChild = 
+            alphabetafold (x:xs) a b bestChild =
                 let child = makeSuccessor gs x
                     newAlpha = (if (isMaximizing child) then alphabetamax else alphabetamin) child (depth+1) depthlimit a b in
                 if (newAlpha >= b)
@@ -50,7 +50,7 @@ alphabeta gs depth depthlimit alpha beta =
     alphabetafold successors alpha beta (-1)
     where     successors = genSuccessors gs
         alphabetafold [] a _ bestChild = (a, Just bestChild)
-        alphabetafold (x:xs) a b bestChild = 
+        alphabetafold (x:xs) a b bestChild =
             let    child = makeSuccessor gs x
                 (newAlph, _) = alphabeta child (depth+1) depthlimit (negate b) (negate a)
                 newAlpha = negate newAlph in
@@ -66,7 +66,7 @@ alphabetamax gs depth depthlimit alpha beta =
     alphabetafold successors alpha beta
     where   successors = genSuccessors gs
             alphabetafold [] a _ = a
-            alphabetafold (x:xs) a b = 
+            alphabetafold (x:xs) a b =
                 let child = makeSuccessor gs x
                     newAlpha = (if (isMaximizing child) then alphabetamax else alphabetamin) child (depth+1) depthlimit a b in
                 if (newAlpha >= b)
@@ -80,7 +80,7 @@ alphabetamin gs depth depthlimit alpha beta =
     alphabetafold successors alpha beta
     where   successors = genSuccessors gs
             alphabetafold [] _ b = b
-            alphabetafold (x:xs) a b = 
+            alphabetafold (x:xs) a b =
                 let child = makeSuccessor gs x
                     newBeta = (if (isMaximizing child) then alphabetamax else alphabetamin) child (depth+1) depthlimit a b in
                 if (newBeta <= a)
