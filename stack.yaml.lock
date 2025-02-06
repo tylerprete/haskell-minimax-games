@@ -13,7 +13,7 @@ packages:
     hackage: diffarray-0.1.1
 snapshots:
 - completed:
-    sha256: 428ec8d5ce932190d3cbe266b9eb3c175cd81e984babf876b64019e2cbe4ea68
-    size: 590100
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/28.yaml
-  original: lts-18.28
+    sha256: 4ef79c30b9efcf07335cb3de532983a7ac4c5a4180bc17f6212a86b09ce2ff75
+    size: 680777
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/23/7.yaml
+  original: lts-23.7
