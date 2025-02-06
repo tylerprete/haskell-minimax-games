@@ -18,12 +18,12 @@ data Board = Board (DiffUArray Int Int)
 
 holeCount = 6
 
-initialBoard = Board $ listArray (0,13) (cycle [6,6,6,6,6,6,0])
+initialBoard = Board $ listArray (0,13) (cycle [4,4,4,4,4,4,0])
 
 data KalahGameState = KalahGameState Board Player Player
     deriving (Show)
 instance GameState KalahGameState where
-    terminalState (KalahGameState b _ _) = bothKalahTotal b == 72
+    terminalState (KalahGameState b _ _) = bothKalahTotal b == 48
     evaluateState (KalahGameState b _ p2) = kalahAdvantage b p2
     genSuccessors (KalahGameState b p _) = possibleMoves b p
     makeSuccessor = sow
@@ -94,8 +94,11 @@ holeOwner    :: Int -> Player
 holeOwner n | n >= 0 && n <= 6 = P1
 holeOwner n | n >= 7 && n <= 13 = P2
 
-holeAcrossBoard    :: Int -> Int
-holeAcrossBoard = (-) 12
+holeAcrossBoard :: Int -> Int
+holeAcrossBoard n
+    | n >= 0 && n <= 5 = 12 - n
+    | n >= 7 && n <= 12 = 12 - n
+    | otherwise = error "Invalid hole index for holeAcrossBoard"
 
 placeStones    :: Board -> Player -> Int -> Int -> (Board, Player)
 {-placeStones b p _ 0 = (b, switchPlayer p)
