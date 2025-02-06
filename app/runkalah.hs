@@ -101,7 +101,7 @@ winner    :: Player -> String
 winner p = "Winner is " ++ (show p)
 
 makeMoveGS  :: KalahGameState -> IO Int
-makeMoveGS gs = do  (score, move) <- return $ alphabeta gs 0 8 (-10000) 10000
+makeMoveGS gs = do  (score, move) <- return $ alphabeta gs 0 9 (-10000) 10000
                     case move of
                         (Just x) -> do { printf "Selected machine move is '%s'. (evaluation = %d)\n\n" (moveToString x) score; return x }
                         Nothing -> error "Should never get nothing as a move"
