@@ -111,7 +111,7 @@ placeStones (Board b) p pos count = placeStones (Board (b // [(pos, (b!pos)+1)])
 -}
 
 placeLastStone  :: Board -> Player -> Int -> (Board, Player)
-placeLastStone brd@(Board b) p pos | b ! pos == 0 && b ! (holeAcrossBoard pos) /= 0 && holeOwner pos == p =
+placeLastStone brd@(Board b) p pos | pos /= 6 && pos /= 13 && b ! pos == 0 && holeOwner pos == p =
     (Board $ b // [(otherHole, 0), (kalahPos p, newCount)], switchPlayer p)
     where   otherHole = holeAcrossBoard pos
             otherHoleCount = (b ! otherHole)
